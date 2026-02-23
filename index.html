@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Across vs AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Across</h1>
+        <span class="subtitle">vs MCTS AI</span>
+    </header>
+
+    <div class="main-layout">
+        <div class="panel">
+            <div class="panel-title">Status</div>
+
+            <div class="turn-display">
+                <div class="turn-label">Current Turn</div>
+                <div class="turn-value setup" id="turn-display">SETUP</div>
+            </div>
+
+            <div id="phase-indicator" class="phase-indicator">COIN TOSS</div>
+
+            <div class="player-card" id="card-human">
+                <div class="player-name">PLAYER</div>
+                <div class="player-role human" id="role-human"><span class="status-dot dot-white"></span>HUMAN</div>
+                <div class="player-goal" id="goal-human">Goal: Top → Bottom</div>
+            </div>
+
+            <div class="player-card" id="card-ai">
+                <div class="player-name">OPPONENT</div>
+                <div class="player-role ai" id="role-ai"><span class="status-dot dot-black"></span>AI</div>
+                <div class="player-goal" id="goal-ai">Goal: Left → Right</div>
+            </div>
+
+            <div class="panel-title">Difficulty</div>
+            <div class="difficulty-section">
+                <button class="diff-btn active" data-iter="150" onclick="setDifficulty(this)">Easy (150)</button>
+                <button class="diff-btn" data-iter="400" onclick="setDifficulty(this)">Normal (400)</button>
+                <button class="diff-btn" data-iter="800" onclick="setDifficulty(this)">Hard (800)</button>
+            </div>
+
+            <!-- Stats (hidden, kept for JS references) -->
+            <div class="hidden">
+                <span id="stat-moves">0</span>
+                <span id="stat-white">0</span>
+                <span id="stat-black">0</span>
+                <span id="stat-links">0</span>
+            </div>
+
+            <button class="btn" onclick="resetGame()">New Game</button>
+            <button class="btn btn-secondary" onclick="exportBoard()">Export PNG</button>
+        </div>
+
+        <div class="board-wrapper">
+            <canvas id="board" width="650" height="650"></canvas>
+            <div class="thinking-overlay" id="thinking-overlay">
+                <div class="thinking-box" id="thinking-text">AI THINKING...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coin Toss Modal -->
+    <div class="modal-backdrop" id="modal-coin">
+        <div class="modal">
+            <div class="modal-title">Coin Toss</div>
+            <div class="modal-desc">
+                Winner places the first peg (always white).<br>
+                Loser chooses White or Black.
+            </div>
+            <div class="coin-container">
+                <div class="coin" id="coin">
+                    <div class="coin-face coin-heads">YOU</div>
+                    <div class="coin-face coin-tails">AI</div>
+                </div>
+            </div>
+            <div class="modal-winner" id="coin-result" style="font-size:32px;">—</div>
+            <button class="btn" id="coin-flip-btn" onclick="flipCoin()">Flip Coin</button>
+            <button class="btn hidden" id="coin-ok-btn" onclick="afterCoinToss()">Continue</button>
+        </div>
+    </div>
+
+    <!-- Color Choice Modal -->
+    <div class="modal-backdrop" id="modal-color">
+        <div class="modal">
+            <div class="modal-title">Choose Your Color</div>
+            <div class="modal-desc" id="color-modal-desc">
+                The first peg (white) has been placed. Choose your color.
+            </div>
+            <div class="color-choice-btns">
+                <button class="color-btn white-choice" onclick="humanChooseColor(1)">
+                    <div class="color-btn-label">WHITE</div>
+                    <div class="color-btn-sub">Top → Bottom</div>
+                </button>
+                <button class="color-btn black-choice" onclick="humanChooseColor(2)">
+                    <div class="color-btn-label">BLACK</div>
+                    <div class="color-btn-sub">Left → Right</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal-backdrop" id="modal-gameover">
+        <div class="modal">
+            <div class="modal-title">Game Over</div>
+            <div class="modal-winner" id="modal-winner">WHITE WINS</div>
+            <div class="modal-sub" id="modal-sub">Connected top to bottom</div>
+            <button class="btn" onclick="closeGameOverModal()">Back to Board</button>
+            <button class="btn btn-secondary" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
