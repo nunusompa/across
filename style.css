@@ -200,7 +200,7 @@ h1 {
     color: var(--bg);
 }
 
-.btn-secondary {
+/* .btn-secondary {
     border-color: #5a5040;
     color: #5a5040;
 }
@@ -208,7 +208,7 @@ h1 {
 .btn-secondary:hover {
     background: #5a5040;
     color: var(--bg);
-}
+} */
 
 .difficulty-section {
     display: flex;
