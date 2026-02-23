@@ -6,6 +6,39 @@ const BOARD_SIZE = 24;
 const CELL_SIZE = canvas.width / (BOARD_SIZE + 1);
 const PEG_RADIUS = 10;
 
+// ─── Color Palette (Canvas drawing) ───────────────────────────────────────
+const COLORS = {
+    // Board
+    boardBg: '#c8a96e',
+    boardTexture: 'rgba(0,0,0,0.04)',
+    gridDot: 'rgba(100,60,20,0.5)',
+
+    // Border lines
+    whiteBorder: '#f5f0e8',
+    blackBorder: '#222222',
+
+    // Links
+    whiteLink: 'rgba(245,240,232,0.9)',
+    blackLink: 'rgba(30,24,20,0.85)',
+
+    // White pegs
+    whitePegFill: '#f5f0e8',
+    whitePegStroke: '#c8bda0',
+    whitePegText: '#3a2510',
+
+    // Black pegs
+    blackPegFill: '#1a1410',
+    blackPegStroke: '#3a3530',
+    blackPegText: '#c8a870',
+
+    // Game over modal
+    whiteWinText: '#f5f0e8',
+    blackWinText: '#e63946',
+};
+
+// Peg number font
+const PEG_FONT = 'bold 11px Space Mono, monospace';
+
 // ─── Game State ────────────────────────────────────────────────────────────
 let currentPlayer = 1;   // 1=white, 2=black
 let pegs = [];
@@ -251,11 +284,11 @@ function shuffle(arr) {
 // ─── Drawing ───────────────────────────────────────────────────────────────
 function drawBoard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#c8a96e';
+    ctx.fillStyle = COLORS.boardBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Texture
-    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+    ctx.fillStyle = COLORS.boardTexture;
     for (let i = 1; i <= BOARD_SIZE; i++) {
         for (let j = 1; j <= BOARD_SIZE; j++) {
             if ((i + j) % 2 === 0) {
@@ -272,7 +305,7 @@ function drawBoard() {
             const s = toScreen(i, j);
             ctx.beginPath();
             ctx.arc(s.sx, s.sy, 2, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(100,60,20,0.5)';
+            ctx.fillStyle = COLORS.gridDot;
             ctx.fill();
         }
     }
@@ -286,9 +319,7 @@ function drawBoard() {
     const wt2 = toScreen(BOARD_SIZE - 0.5, 1);
     const wb1 = toScreen(1.5, BOARD_SIZE);
     const wb2 = toScreen(BOARD_SIZE - 0.5, BOARD_SIZE);
-    ctx.strokeStyle = '#f5f0e8';
-    ctx.shadowColor = '#f5f0e8';
-    ctx.shadowBlur = 8;
+    ctx.strokeStyle = COLORS.whiteBorder;
     ctx.beginPath();
     ctx.moveTo(wt1.sx, wt1.sy); ctx.lineTo(wt2.sx, wt2.sy);
     ctx.moveTo(wb1.sx, wb1.sy); ctx.lineTo(wb2.sx, wb2.sy);
@@ -299,13 +330,11 @@ function drawBoard() {
     const bl2 = toScreen(1, BOARD_SIZE - 0.5);
     const br1 = toScreen(BOARD_SIZE, 1.5);
     const br2 = toScreen(BOARD_SIZE, BOARD_SIZE - 0.5);
-    ctx.strokeStyle = '#222';
-    ctx.shadowColor = '#444';
+    ctx.strokeStyle = COLORS.blackBorder;
     ctx.beginPath();
     ctx.moveTo(bl1.sx, bl1.sy); ctx.lineTo(bl2.sx, bl2.sy);
     ctx.moveTo(br1.sx, br1.sy); ctx.lineTo(br2.sx, br2.sy);
     ctx.stroke();
-    ctx.shadowBlur = 0;
 
     // Links
     links.forEach(link => {
@@ -314,12 +343,9 @@ function drawBoard() {
         ctx.beginPath();
         ctx.moveTo(s1.sx, s1.sy);
         ctx.lineTo(s2.sx, s2.sy);
-        ctx.strokeStyle = link.player === 1 ? 'rgba(245,240,232,0.9)' : 'rgba(30,24,20,0.85)';
+        ctx.strokeStyle = link.player === 1 ? COLORS.whiteLink : COLORS.blackLink;
         ctx.lineWidth = 4;
-        ctx.shadowColor = link.player === 1 ? '#fff' : '#000';
-        ctx.shadowBlur = 4;
         ctx.stroke();
-        ctx.shadowBlur = 0;
     });
 
     // Pegs
@@ -327,22 +353,16 @@ function drawBoard() {
         const s = toScreen(peg.x, peg.y);
         const isWhite = peg.player === 1;
 
-        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        ctx.shadowBlur = 6;
-        ctx.shadowOffsetY = 2;
-
         ctx.beginPath();
         ctx.arc(s.sx, s.sy, PEG_RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = isWhite ? '#f5f0e8' : '#1a1410';
+        ctx.fillStyle = isWhite ? COLORS.whitePegFill : COLORS.blackPegFill;
         ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = isWhite ? '#d4c8a8' : '#3a3530';
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = isWhite ? COLORS.whitePegStroke : COLORS.blackPegStroke;
         ctx.stroke();
 
-        ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-
-        ctx.fillStyle = isWhite ? '#3a2510' : '#c8a870';
-        ctx.font = 'bold 11px Space Mono, monospace';
+        ctx.fillStyle = isWhite ? COLORS.whitePegText : COLORS.blackPegText;
+        ctx.font = PEG_FONT;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(peg.number, s.sx, s.sy);
@@ -351,19 +371,15 @@ function drawBoard() {
 
 function drawNeutralPeg(gx, gy) {
     const s = toScreen(gx, gy);
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 2;
     ctx.beginPath();
     ctx.arc(s.sx, s.sy, PEG_RADIUS + 2, 0, Math.PI * 2);
-    ctx.fillStyle = '#d4a853';
+    ctx.fillStyle = COLORS.whitePegFill;
     ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#aa8030';
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = COLORS.whitePegStroke;
     ctx.stroke();
-    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    ctx.fillStyle = '#1a1410';
-    ctx.font = 'bold 11px Space Mono, monospace';
+    ctx.fillStyle = COLORS.whitePegText;
+    ctx.font = PEG_FONT;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('1', s.sx, s.sy);
@@ -458,10 +474,10 @@ function showGameOver(winner) {
     const isHumanWin = winner === humanColor;
     if (winner === 1) {
         winnerEl.textContent = 'WHITE WINS';
-        winnerEl.style.color = '#f5f0e8';
+        winnerEl.style.color = COLORS.whiteWinText;
     } else {
         winnerEl.textContent = 'BLACK WINS';
-        winnerEl.style.color = '#e63946';
+        winnerEl.style.color = COLORS.blackWinText;
     }
     subEl.textContent = isHumanWin ? 'You win! Connected top to bottom.' : 'AI wins! Connected left to right.';
     modal.classList.add('active');
